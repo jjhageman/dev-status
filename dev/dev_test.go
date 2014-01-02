@@ -1,0 +1,38 @@
+package dev
+
+import "testing"
+
+func newDevOrFatal(t *testing.T, first_name string, last_name string, github_id string, status string) *Dev {
+	dev, err := NewDev(first_name, last_name, github_id, status)
+	if err != nil {
+		t.Fatalf("new dev: %v", err)
+	}
+	return dev
+}
+
+func TestNewDev(t *testing.T) {
+	first_name := "John"
+	last_name := "Doe"
+	github_id := "lambda_joe"
+	status := "available"
+	dev := newDevOrFatal(t, first_name, last_name, github_id, status)
+	if dev.FirstName != first_name {
+		t.Errorf("expected first name %q, got %q", first_name, dev.FirstName)
+	}
+	if dev.LastName != last_name {
+		t.Errorf("expected last name %q, got %q", last_name, dev.LastName)
+	}
+	if dev.GithubID != github_id {
+		t.Errorf("expected github id %q, got %q", github_id, dev.GithubID)
+	}
+	if dev.Status != status {
+		t.Errorf("expected status %q, got %q", status, dev.Status)
+	}
+}
+
+func TestNewDevInvalidStatus(t *testing.T) {
+	_, err := NewDev("John", "Doe", "lambda_joe", "bogus")
+	if err == nil {
+		t.Errorf("expected 'invalid status' error, got nil")
+	}
+}
