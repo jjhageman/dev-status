@@ -1,17 +1,20 @@
 package main
 
 import (
-	//"./dev"
+	"github.com/coopernurse/gorp"
+	"github.com/jjhageman/dev-status/db"
 	"github.com/rcrowley/go-tigertonic"
 	"net/http"
 	"net/url"
 )
 
 var (
-	mux *tigertonic.TrieServeMux
+	mux   *tigertonic.TrieServeMux
+	Dbmap *gorp.DbMap
 )
 
 func init() {
+	Dbmap = db.InitDb()
 	mux = tigertonic.NewTrieServeMux()
 	mux.Handle("GET", "/user/{id}", tigertonic.Timed(tigertonic.Marshaled(getUser), "getUser", nil))
 }

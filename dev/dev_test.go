@@ -10,6 +10,19 @@ func newDevOrFatal(t *testing.T, first_name string, last_name string, github_id 
 	return dev
 }
 
+func TestAll(t *testing.T) {
+	dev1 := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
+	dev2 := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
+
+	dev1.save()
+	dev2.save()
+
+	devs := All()
+	if len(devs) != 2 {
+		t.Errorf("expected 2 devs, got %v", len(devs))
+	}
+}
+
 func TestNewDev(t *testing.T) {
 	first_name := "John"
 	last_name := "Doe"
@@ -35,4 +48,9 @@ func TestNewDevInvalidStatus(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected 'invalid status' error, got nil")
 	}
+}
+
+func TestSaveDev(t *testing.T) {
+	dev := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
+	dev.save()
 }

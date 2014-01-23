@@ -20,7 +20,7 @@ func TestGetUser(t *testing.T) {
 	if code != http.StatusOK {
 		t.Fatal(code)
 	}
-	if "Bob" != response.FirstName {
+	if response.FirstName != "Bob" {
 		t.Errorf("expected Bob, got %v", response.FirstName)
 		t.Fatal(response)
 	}
