@@ -4,15 +4,16 @@ import (
 	"database/sql"
 	"github.com/coopernurse/gorp"
 	"github.com/jjhageman/dev-status/dev"
-	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 	"log"
-	"os"
+	//"os"
 )
 
 func InitDb() *gorp.DbMap {
-	url := os.Getenv("HEROKU_POSTGRESQL_COPPER_URL")
-	conn, _ := pq.ParseURL(url)
-	conn += " sslmode=require"
+	//url := os.Getenv("HEROKU_POSTGRESQL_COPPER_URL")
+	//conn, _ := pq.ParseURL(url)
+	conn := "postgres://jeremyhageman@localhost:5432/devstatus"
+	conn += "?sslmode=disable"
 	// connect to db using standard Go database/sql API
 	db, err := sql.Open("postgres", conn)
 	checkErr(err, "sql.Open failed")

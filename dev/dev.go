@@ -2,7 +2,8 @@ package dev
 
 import (
 	"fmt"
-	//"github.com/coopernurse/gorp"
+	"github.com/coopernurse/gorp"
+	"log"
 )
 
 type Dev struct {
@@ -14,6 +15,7 @@ type Dev struct {
 }
 
 var statuses = [3]string{"available", "looking", "unavailable"}
+var Dbmap *gorp.DbMap
 
 func NewDev(first_name string, last_name string, github_id string, status string) (*Dev, error) {
 	if !validStatus(status) {
@@ -29,6 +31,7 @@ func (d *Dev) save() error {
 func All() []*Dev {
 	var devs []*Dev
 	_, err := Dbmap.Select(&devs, "select * from devs order by id")
+	checkErr(err, "select all failed")
 	return devs
 }
 
@@ -39,4 +42,10 @@ func validStatus(status string) bool {
 		}
 	}
 	return false
+}
+
+func checkErr(err error, msg string) {
+	if err != nil {
+		log.Fatalln(msg, err)
+	}
 }
