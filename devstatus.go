@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 )
 
@@ -19,7 +20,7 @@ func init() {
 }
 
 func main() {
-	tigertonic.NewServer(":8000", tigertonic.Logged(mux, nil)).ListenAndServe()
+	tigertonic.NewServer(":"+os.Getenv("PORT"), tigertonic.Logged(mux, nil)).ListenAndServe()
 }
 
 func getUser(u *url.URL, h http.Header, rq *UserRequest) (int, http.Header, *UserResponse, error) {

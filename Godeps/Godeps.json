@@ -1,0 +1,23 @@
+{
+	"ImportPath": "github.com/jjhageman/dev-status",
+	"GoVersion": "go1.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/coopernurse/gorp",
+			"Comment": "v1.4",
+			"Rev": "08e1d8ca19c74cb69e01ff7a8f332a2e46448c47"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Rev": "6577a6a8a8b66cc558ebe37f51ca07833bfa433b"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-metrics",
+			"Rev": "880a57cfbce579be3970f997eb8f589ba0b03211"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-tigertonic",
+			"Rev": "262ef6bd70982e08dd81096f467bf918e46a4162"
+		}
+	]
+}

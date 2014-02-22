@@ -5,6 +5,7 @@ import (
 	"github.com/coopernurse/gorp"
 	"github.com/jjhageman/dev-status/db"
 	"log"
+	"os"
 )
 
 type Dev struct {
@@ -19,7 +20,10 @@ var statuses = [3]string{"available", "looking", "unavailable"}
 var dbmap *gorp.DbMap
 
 func init() {
-	dbmap = db.InitDb("postgres://jjhageman@localhost:5432/devstatus?sslmode=disable")
+	url := os.Getenv("HEROKU_POSTGRESQL_COPPER_URL")
+	url += " sslmode=require"
+	//conn := "postgres://jjhageman@localhost:5432/devstatus?sslmode=disable"
+	dbmap = db.InitDb(url)
 	// add a table, setting the table name to 'posts' and
 	// specifying that the Id property is an auto incrementing PK
 	dbmap.AddTableWithName(Dev{}, "devs").SetKeys(true, "ID")
