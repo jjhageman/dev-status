@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/jjhageman/dev-status/db"
 	"github.com/jjhageman/dev-status/dev"
 	"github.com/rcrowley/go-tigertonic"
+	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 var (
@@ -13,7 +14,6 @@ var (
 )
 
 func init() {
-	dev.Dbmap = db.InitDb()
 	mux = tigertonic.NewTrieServeMux()
 	mux.Handle("GET", "/user/{id}", tigertonic.Timed(tigertonic.Marshaled(getUser), "getUser", nil))
 }
@@ -23,5 +23,11 @@ func main() {
 }
 
 func getUser(u *url.URL, h http.Header, rq *UserRequest) (int, http.Header, *UserResponse, error) {
-	return http.StatusOK, nil, &UserResponse{"Test", "User", "1234", "Available"}, nil
+	id := u.Query().Get("id")
+	strId, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		log.Println(err)
+	}
+	dev := dev.Find(strId)
+	return http.StatusOK, nil, &UserResponse{dev.FirstName, dev.LastName, dev.GithubID, dev.Status}, nil
 }

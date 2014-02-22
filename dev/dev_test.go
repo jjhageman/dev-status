@@ -1,6 +1,12 @@
 package dev
 
-import "testing"
+import (
+	"github.com/coopernurse/gorp"
+	"github.com/jjhageman/dev-status/db"
+	"log"
+	"os"
+	"testing"
+)
 
 func newDevOrFatal(t *testing.T, first_name string, last_name string, github_id string, status string) *Dev {
 	dev, err := NewDev(first_name, last_name, github_id, status)
@@ -10,16 +16,58 @@ func newDevOrFatal(t *testing.T, first_name string, last_name string, github_id 
 	return dev
 }
 
-func TestAll(t *testing.T) {
-	dev1 := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
-	dev2 := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
+func initDbMap() *gorp.DbMap {
+	dbmap = db.InitDb("postgres://jjhageman@localhost:5432/devstatus_test?sslmode=disable")
+	dbmap.TraceOn("", log.New(os.Stdout, "gorptest: ", log.Lmicroseconds))
+	dbmap.AddTableWithName(Dev{}, "devs").SetKeys(true, "ID")
+	err := dbmap.CreateTablesIfNotExists()
+	checkErr(err, "Create tables failed")
+	return dbmap
+}
 
-	dev1.save()
-	dev2.save()
+func dropAndClose(dbmap *gorp.DbMap) {
+	dbmap.DropTablesIfExists()
+	dbmap.Db.Close()
+}
+
+func TestAll(t *testing.T) {
+	dbmap := initDbMap()
+	defer dropAndClose(dbmap)
+
+	//var ds []Dev
+	//_, err := dbmap.Select(&ds, "select * from devs order by id")
+	//checkErr(err, "Select failed")
+	//log.Println("All rows:")
+	//for x, p := range ds {
+	//	log.Printf("    %d: %v\n", x, p)
+	//}
+
+	dev1 := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
+	dev2 := newDevOrFatal(t, "Jim", "Jones", "killer_bob", "unavailable")
+
+	dev1.Save()
+	dev2.Save()
 
 	devs := All()
 	if len(devs) != 2 {
 		t.Errorf("expected 2 devs, got %v", len(devs))
+	}
+	if *devs[0] != *dev1 && *devs[1] != *dev1 {
+		t.Errorf("missing dev: %v", dev1)
+	}
+}
+
+func TestFind(t *testing.T) {
+	dbmap := initDbMap()
+	defer dropAndClose(dbmap)
+
+	dev := newDevOrFatal(t, "Tom", "Jones", "killer_bob", "unavailable")
+	dev.Save()
+
+	found := Find(dev.ID)
+
+	if *found != *dev {
+		t.Errorf("missing dev: %v", dev)
 	}
 }
 
@@ -51,6 +99,15 @@ func TestNewDevInvalidStatus(t *testing.T) {
 }
 
 func TestSaveDev(t *testing.T) {
-	dev := newDevOrFatal(t, "Bob", "Jones", "killer_bob", "unavailable")
-	dev.save()
+	dbmap := initDbMap()
+	defer dropAndClose(dbmap)
+
+	dev := newDevOrFatal(t, "Bill", "Jones", "killer_bob", "unavailable")
+	dev.Save()
+
+	count, err := dbmap.SelectInt("select count(*) from devs")
+	checkErr(err, "select all failed")
+	if count != 1 {
+		t.Errorf("expected 1 saved dev, got %q", count)
+	}
 }

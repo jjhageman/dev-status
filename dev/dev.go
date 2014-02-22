@@ -3,6 +3,7 @@ package dev
 import (
 	"fmt"
 	"github.com/coopernurse/gorp"
+	"github.com/jjhageman/dev-status/db"
 	"log"
 )
 
@@ -15,7 +16,19 @@ type Dev struct {
 }
 
 var statuses = [3]string{"available", "looking", "unavailable"}
-var Dbmap *gorp.DbMap
+var dbmap *gorp.DbMap
+
+func init() {
+	dbmap = db.InitDb("postgres://jjhageman@localhost:5432/devstatus?sslmode=disable")
+	// add a table, setting the table name to 'posts' and
+	// specifying that the Id property is an auto incrementing PK
+	dbmap.AddTableWithName(Dev{}, "devs").SetKeys(true, "ID")
+
+	// create the table. in a production system you'd generally
+	// use a migration tool, or create the tables via scripts
+	err := dbmap.CreateTablesIfNotExists()
+	checkErr(err, "Create tables failed")
+}
 
 func NewDev(first_name string, last_name string, github_id string, status string) (*Dev, error) {
 	if !validStatus(status) {
@@ -24,15 +37,24 @@ func NewDev(first_name string, last_name string, github_id string, status string
 	return &Dev{0, first_name, last_name, github_id, status}, nil
 }
 
-func (d *Dev) save() error {
-	return nil
+func (d *Dev) Save() error {
+	err := dbmap.Insert(d)
+	checkErr(err, "Insert failed")
+	return err
 }
 
 func All() []*Dev {
 	var devs []*Dev
-	_, err := Dbmap.Select(&devs, "select * from devs order by id")
+	_, err := dbmap.Select(&devs, "select * from devs order by id")
 	checkErr(err, "select all failed")
 	return devs
+}
+
+func Find(id int64) *Dev {
+	var dev Dev
+	err := dbmap.SelectOne(&dev, "select * from devs where id=$1", id)
+	checkErr(err, "select by id failed")
+	return &dev
 }
 
 func validStatus(status string) bool {
