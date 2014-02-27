@@ -79,3 +79,29 @@ func TestGetUser(t *testing.T) {
 		t.Fatal(response)
 	}
 }
+
+func TestGetInvalidUser(t *testing.T) {
+	dbmap := initDbMap()
+	defer dropAndClose(dbmap)
+
+	code, _, response, err := getUser(
+		mocking.URL(mux, "GET", "/user/99"),
+		mocking.Header(nil),
+		nil,
+	)
+	log.Println(err)
+	if err.Error() != "User not found" {
+		t.Errorf("expected User not found error, got %v", err.Error())
+		t.Fatal(err)
+	}
+
+	if code != http.StatusNotFound {
+		t.Errorf("expected StatusNotFound, got %v", code)
+		t.Fatal(code)
+	}
+
+	if response != nil {
+		t.Errorf("expected 'Invalid user' status, got %v", response.Status)
+		t.Fatal(response.Status)
+	}
+}

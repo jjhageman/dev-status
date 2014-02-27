@@ -64,10 +64,25 @@ func TestFind(t *testing.T) {
 	dev := newDevOrFatal(t, "Tom", "Jones", "killer_bob", "unavailable")
 	dev.Save()
 
-	found := Find(dev.ID)
+	found, err := Find(dev.ID)
+
+	if err != nil {
+		t.Errorf("find dev: %v", err)
+	}
 
 	if *found != *dev {
 		t.Errorf("missing dev: %v", dev)
+	}
+}
+
+func TestFindDoesNotExist(t *testing.T) {
+	dbmap := initDbMap()
+	defer dropAndClose(dbmap)
+
+	_, err := Find(99)
+
+	if err == nil {
+		t.Errorf("expected 'no rows in result set' error, got nil")
 	}
 }
 

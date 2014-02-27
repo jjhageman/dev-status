@@ -5,7 +5,7 @@ import (
 	"github.com/coopernurse/gorp"
 	"github.com/jjhageman/dev-status/db"
 	"log"
-	"os"
+	//"os"
 )
 
 type Dev struct {
@@ -20,9 +20,9 @@ var statuses = [3]string{"available", "looking", "unavailable"}
 var dbmap *gorp.DbMap
 
 func init() {
-	url := os.Getenv("HEROKU_POSTGRESQL_COPPER_URL")
-	url += " sslmode=require"
-	//conn := "postgres://jjhageman@localhost:5432/devstatus?sslmode=disable"
+	//url := os.Getenv("HEROKU_POSTGRESQL_COPPER_URL")
+	//url += " sslmode=require"
+	url := "postgres://jjhageman@localhost:5432/devstatus?sslmode=disable"
 	dbmap = db.InitDb(url)
 	// add a table, setting the table name to 'posts' and
 	// specifying that the Id property is an auto incrementing PK
@@ -54,11 +54,11 @@ func All() []*Dev {
 	return devs
 }
 
-func Find(id int64) *Dev {
+func Find(id int64) (*Dev, error) {
 	var dev Dev
 	err := dbmap.SelectOne(&dev, "select * from devs where id=$1", id)
-	checkErr(err, "select by id failed")
-	return &dev
+	//checkErr(err, "select by id failed")
+	return &dev, err
 }
 
 func validStatus(status string) bool {

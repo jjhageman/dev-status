@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/jjhageman/dev-status/dev"
 	"github.com/rcrowley/go-tigertonic"
 	"log"
@@ -29,6 +30,11 @@ func getUser(u *url.URL, h http.Header, rq *UserRequest) (int, http.Header, *Use
 	if err != nil {
 		log.Println(err)
 	}
-	dev := dev.Find(strId)
+
+	dev, err2 := dev.Find(strId)
+	if err2 != nil {
+		return http.StatusNotFound, nil, nil, tigertonic.NotFound{errors.New("User not found")}
+	}
+
 	return http.StatusOK, nil, &UserResponse{dev.FirstName, dev.LastName, dev.GithubID, dev.Status}, nil
 }
